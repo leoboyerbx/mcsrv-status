@@ -33,6 +33,9 @@ function sameArrayContent(array1, array2) {
 let prevPlayers = []
 let cachedPlayers = []
 
+
+app.use('/', express.static('dist'))
+
 const q = new Query({host: 'localhost', port: 25565, timeout: 7500});
 app.get('/query', async (req, res) => {
   const serverData = await q.fullStat().catch(e => {
