@@ -2,7 +2,17 @@ const serverData = require('../minecraft/serverData')
 const { token, prefix } = require('./config')
 const Discord = require('discord.js');
 const client = new Discord.Client();
+require('discord-buttons')(client)
+const { MessageButton, MessageActionRow } = require('discord-buttons');
 
+let messagesToDelete = []
+async function updateOnlinePlayers(channel) {
+  for (const message of messagesToDelete) {
+    console.log(message)
+    await message.delete()
+  }
+  await sendOnlinePlayers(channel)
+}
 async function sendOnlinePlayers(channel) {
   const loadingEmbed = new Discord.MessageEmbed()
     .setColor('#40cbbe')
@@ -18,13 +28,18 @@ async function sendOnlinePlayers(channel) {
     players.push({"name":"ponkadmin","id":"7cb8cae8a71343ff918e488694d22533"})
     players.push({"name":"happy_hyu","id":"d8d722a252ec46e9bcbbf5cde6bbff8e"})
   }
-  const loadedEmbed = new Discord.MessageEmbed()
-    .setColor('#40cbbe')
-    .setTitle("Joueurs actuellement connectés au serveur:")
-    .setAuthor('----------', 'https://image.flaticon.com/icons/png/128/1057/1057254.png')
-  initialMessage.edit(loadedEmbed)
-  players.forEach(player => {
-    console.log(player)
+
+  initialMessage.edit('', {
+    embed: {
+      color: '#40cbbe',
+      title: 'Joueurs actuellement connectés au serveur:',
+      author: {
+        name: '----------',
+        icon_url: 'https://image.flaticon.com/icons/png/128/1057/1057254.png'
+      },
+    }
+  })
+  for (const player of players) {
     const embed = new Discord.MessageEmbed()
       .setColor('#40cbbe')
       // .setTitle(player.name)
@@ -33,8 +48,29 @@ async function sendOnlinePlayers(channel) {
       .setThumbnail('https://crafatar.com/renders/body/' + player.id + '?scale=10')
       // .setThumbnail('https://crafatar.com/avatars/' + player.id)
       .setAuthor(player.name, 'https://crafatar.com/avatars/' + player.id, 'https://fr.namemc.com/' + player.id)
-    channel.send(embed)
-  })
+    const message = await channel.send(embed)
+    messagesToDelete.push(message)
+  }
+
+  messagesToDelete.push(initialMessage)
+
+
+  const refreshButton = new MessageButton()
+    .setLabel("Actualiser")
+    .setStyle("blurple")
+    .setID('refreshPlayers')
+  console.log(refreshButton)
+  const statusButton = new MessageButton()
+    .setLabel("Voir le statut en ligne")
+    .setStyle('url')
+    .setURL('https://status.bruleurs.ml')
+
+  const buttonRow = new MessageActionRow()
+    .addComponent(refreshButton)
+    .addComponent(statusButton)
+
+  const updateMessage = await channel.send(`_Mis à jour à ${new Date().toLocaleTimeString()} le ${new Date().toLocaleDateString()}_`, buttonRow)
+  messagesToDelete.push(updateMessage)
 }
 
 module.exports = async () => {
@@ -45,6 +81,12 @@ module.exports = async () => {
   client.on('message', message => {
     if (message.content.startsWith(`${prefix}online`)) {
       sendOnlinePlayers(message.channel)
+    }
+  });
+  client.on('clickButton', async (button) => {
+    button.reply.fetch()
+    if(button.id === 'refreshPlayers') {
+      updateOnlinePlayers(button.channel)
     }
   });
 
