@@ -16,9 +16,9 @@ async function sendOnlinePlayers(channel) {
     players = data.players
   } catch (e) {
     console.log('server isoffline')
-    players.push({"name":"ponk___","id":"d2ee43c7188b4cf2b02bc39c58bf0264"})
-    players.push({"name":"ponkadmin","id":"7cb8cae8a71343ff918e488694d22533"})
-    players.push({"name":"happy_hyu","id":"d8d722a252ec46e9bcbbf5cde6bbff8e"})
+    // players.push({"name":"ponk___","id":"d2ee43c7188b4cf2b02bc39c58bf0264"})
+    // players.push({"name":"ponkadmin","id":"7cb8cae8a71343ff918e488694d22533"})
+    // players.push({"name":"happy_hyu","id":"d8d722a252ec46e9bcbbf5cde6bbff8e"})
   }
 
   initialMessage.edit('', {
@@ -31,16 +31,23 @@ async function sendOnlinePlayers(channel) {
       },
     }
   })
-  for (const player of players) {
+  if (players.length) {
+    for (const player of players) {
+      const embed = new Discord.MessageEmbed()
+        .setColor('#40cbbe')
+        // .setTitle(player.name)
+        .setDescription('------------------------')
+        // .setURL('https://fr.namemc.com/' + player.id)
+        .setThumbnail('https://crafatar.com/renders/body/' + player.id + '?scale=10')
+        // .setThumbnail('https://crafatar.com/avatars/' + player.id)
+        .setAuthor(player.name, 'https://crafatar.com/avatars/' + player.id, 'https://fr.namemc.com/' + player.id)
+       channel.send(embed)
+    }
+  } else {
     const embed = new Discord.MessageEmbed()
       .setColor('#40cbbe')
-      // .setTitle(player.name)
-      .setDescription('------------------------')
-      // .setURL('https://fr.namemc.com/' + player.id)
-      .setThumbnail('https://crafatar.com/renders/body/' + player.id + '?scale=10')
-      // .setThumbnail('https://crafatar.com/avatars/' + player.id)
-      .setAuthor(player.name, 'https://crafatar.com/avatars/' + player.id, 'https://fr.namemc.com/' + player.id)
-     channel.send(embed)
+      .setDescription('_Aucun joueur connecté._')
+    channel.send(embed)
   }
 
   const refreshButton = new MessageButton()
@@ -49,7 +56,7 @@ async function sendOnlinePlayers(channel) {
     .setID('refreshPlayers')
   console.log(refreshButton)
   const statusButton = new MessageButton()
-    .setLabel("Voir le statut en ligne")
+    .setLabel("Voir le statut en temps réel")
     .setStyle('url')
     .setURL('https://status.bruleurs.ml')
 
