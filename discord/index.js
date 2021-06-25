@@ -1,18 +1,10 @@
 const serverData = require('../minecraft/serverData')
-const { token, prefix } = require('./config')
+const { token, prefix, onlineChannel } = require('./config')
 const Discord = require('discord.js');
 const client = new Discord.Client();
 require('discord-buttons')(client)
 const { MessageButton, MessageActionRow } = require('discord-buttons');
 
-let messagesToDelete = []
-async function updateOnlinePlayers(channel) {
-  for (const message of messagesToDelete) {
-    console.log(message)
-    await message.delete()
-  }
-  await sendOnlinePlayers(channel)
-}
 async function sendOnlinePlayers(channel) {
   const loadingEmbed = new Discord.MessageEmbed()
     .setColor('#40cbbe')
@@ -48,12 +40,8 @@ async function sendOnlinePlayers(channel) {
       .setThumbnail('https://crafatar.com/renders/body/' + player.id + '?scale=10')
       // .setThumbnail('https://crafatar.com/avatars/' + player.id)
       .setAuthor(player.name, 'https://crafatar.com/avatars/' + player.id, 'https://fr.namemc.com/' + player.id)
-    const message = await channel.send(embed)
-    messagesToDelete.push(message)
+     channel.send(embed)
   }
-
-  messagesToDelete.push(initialMessage)
-
 
   const refreshButton = new MessageButton()
     .setLabel("Actualiser")
@@ -70,7 +58,6 @@ async function sendOnlinePlayers(channel) {
     .addComponent(statusButton)
 
   const updateMessage = await channel.send(`_Mis à jour à ${new Date().toLocaleTimeString()} le ${new Date().toLocaleDateString()}_`, buttonRow)
-  messagesToDelete.push(updateMessage)
 }
 
 module.exports = async () => {
@@ -79,14 +66,15 @@ module.exports = async () => {
   });
 
   client.on('message', message => {
-    if (message.content.startsWith(`${prefix}online`)) {
+    if (message.content.startsWith(`${prefix}online`) && message.channel.name === onlineChannel) {
       sendOnlinePlayers(message.channel)
     }
   });
   client.on('clickButton', async (button) => {
-    button.reply.fetch()
     if(button.id === 'refreshPlayers') {
-      updateOnlinePlayers(button.channel)
+      await button.reply.send('Mise à jour en cours...')
+      await sendOnlinePlayers(button.channel)
+      button.reply.delete()
     }
   });
 
