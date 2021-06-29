@@ -1,4 +1,4 @@
-const Query = require("minecraft-query");
+const Query = require("./lib/Query");
 const axios = require('axios')
 const EventEmitter = require('events')
 const sameArrayContent = require('./helpers/sameArrayContent')
@@ -24,6 +24,9 @@ class ServerStatus extends EventEmitter {
     })
 
     this.fetchInterval = setInterval(this.fetchData.bind(this), 1000)
+    this.fetchData().then(() => {
+      this.emit('players', this.serverData.players)
+    })
   }
 
   get fullServerData() {

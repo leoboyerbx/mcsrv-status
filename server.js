@@ -17,7 +17,7 @@ app.listen(port, () => {
   console.log(`Server app running at http://localhost:${port}`)
 })
 
-serverStatus.on('players-changed', data => {
-  console.log(data.players)
+serverStatus.on('data', data => {
+  console.log(data)
 })
-discord()
+// discord()
