@@ -1,20 +1,23 @@
-require('dotenv-flow').config();
+require('dotenv-flow').config()
 const express = require('express')
+const ServerStatus = require('./minecraft/ServerStatus')
 const discord = require('./discord')
-const serverData = require('./minecraft/serverData')
 
 const app = express()
 const port = 6754
 
 app.use('/', express.static('dist'))
 
-app.get('/query', async (req, res) => {
-  const result = await serverData()
-    res.send(result)
-  })
+const serverStatus = ServerStatus.getInstance()
+app.get('/query', (req, res) => {
+  res.send(serverStatus.serverData)
+})
 
 app.listen(port, () => {
   console.log(`Server app running at http://localhost:${port}`)
 })
 
+serverStatus.on('players-changed', data => {
+  console.log(data.players)
+})
 discord()
