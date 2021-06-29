@@ -17,7 +17,7 @@ app.listen(port, () => {
   console.log(`Server app running at http://localhost:${port}`)
 })
 
-serverStatus.on('data', data => {
-  console.log(data)
-})
-// discord()
+// serverStatus.on('data', data => {
+//   console.log(data)
+// })
+discord().then()

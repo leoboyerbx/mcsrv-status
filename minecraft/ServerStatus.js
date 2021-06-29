@@ -32,6 +32,9 @@ class ServerStatus extends EventEmitter {
   get fullServerData() {
     return { ...this.serverData, online: this.serverOnline }
   }
+  get players() {
+    return this.cachedPlayers
+  }
 
   async fetchData() {
     let serverData
