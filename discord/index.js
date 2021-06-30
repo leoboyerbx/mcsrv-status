@@ -9,6 +9,7 @@ const deleteFile = promisify(fs.unlink)
 const checkExists = promisify(fs.access)
 const client = new Discord.Client()
 require('discord-buttons')(client)
+const { MessageButton } = require('discord-buttons');
 
 const serverStatus = ServerStatus.getInstance()
 let onlineChannel
@@ -62,26 +63,27 @@ const getStatusEmbed = async () => {
     }
     cleanFile('./public/online-'+ (imgIndex - 1) +'.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
     imgIndex++
-    return embed
+
+
+    const statusButton = new MessageButton()
+      .setLabel("Voir le statut en ligne")
+      .setStyle('url')
+      .setURL('https://status.bruleurs.ml')
+    const mapButton = new MessageButton()
+      .setLabel("Ouvrir la Carte")
+      .setStyle('url')
+      .setURL('https://map.bruleurs.ml')
+    return { embed, buttons: [statusButton, mapButton] }
   }
 }
 
-let activeMessage
-const moveStatusMessage = async (channel) => {
-  const embedData = await getStatusEmbed()
-  const message = await channel.send('_Statut en temps réel_', embedData)
-  activeMessage = message.id
-}
-
 const updateStatusMessage = async () => {
-  if (!activeMessage) return
-  const embedData = await getStatusEmbed()
+  const embed = await getStatusEmbed()
   try {
     await onlineChannel.bulkDelete(10);
-    await onlineChannel.send('_Statut en temps réel_', embedData)
+    await onlineChannel.send('_Statut en temps réel_\n__', embed)
   } catch (e) {
     console.log(e)
-    activeMessage = false
   }
 }
 
@@ -92,7 +94,7 @@ bot
   .action(async message => {
     if (message.channel.id === onlineChannelId) {
       await message.delete()
-      await moveStatusMessage(message.channel)
+      await updateStatusMessage()
     }
   })
 bot.command('clean').action((message) => {
@@ -105,6 +107,7 @@ module.exports = async () => {
   client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`)
     onlineChannel = await client.channels.fetch(onlineChannelId)
+    updateStatusMessage()
 
     serverStatus.on('data', () => {
       updateStatusMessage()
