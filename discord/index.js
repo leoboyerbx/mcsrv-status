@@ -39,23 +39,26 @@ const getStatusEmbed = async () => {
     }
     const img = await mergeImg(images, { offset: 20 })
     await writeImage(img, './public/online-'+ imgIndex +'.png')
-    attachment = new Discord.MessageAttachment('./public/online-'+ imgIndex +'.png')
+    attachment = './public/online-'+ imgIndex +'.png'
+    // attachment = new Discord.MessageAttachment('./public/online-'+ imgIndex +'.png')
     const embed = new Discord.MessageEmbed()
       .setColor('#40cbbe')
       .setDescription(description)
-    if (attachment) {
-      embed.attachFiles(attachment)
-        .setImage('attachment://online-'+ imgIndex +'.png')
-    }
+    // if (attachment) {
+    //   embed.attachFiles(attachment)
+    //     .setThumbnail('attachment://online-'+ imgIndex +'.png')
+    // }
     imgIndex++
-    return embed
+    const result = { embed }
+    if (attachment) result.files = [ attachment ]
+    return result
   }
 }
 
-const activeMessages = []
+let activeMessage
 const addStatusMessage = async (channel) => {
-  const embedMessage = await getStatusEmbed()
-  const message = await channel.send('_Statut en temps réel_', embedMessage)
+  const embedData = await getStatusEmbed()
+  const message = await channel.send('_Statut en temps réel_', embedData)
   activeMessages.push(message.id)
 }
 
