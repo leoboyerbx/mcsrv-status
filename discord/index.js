@@ -4,6 +4,9 @@ const Discord = require('discord.js')
 const bot = require('bot-commander')
 const mergeImg = require('merge-img')
 const { promisify } = require('util')
+const fs = require('fs')
+const deleteFile = promisify(fs.unlink)
+const checkExists = promisify(fs.access)
 const client = new Discord.Client()
 require('discord-buttons')(client)
 
@@ -17,6 +20,16 @@ const writeImage = (img, path) => {
       resolve()
     })
   })
+}
+
+const cleanFile = async filename => {
+  try {
+    await checkExists(filename)
+    await deleteFile(filename)
+    return true
+  } catch (e) {
+    return false
+  }
 }
 
 const getStatusEmbed = async () => {
@@ -40,59 +53,52 @@ const getStatusEmbed = async () => {
     const img = await mergeImg(images, { offset: 20 })
     await writeImage(img, './public/online-'+ imgIndex +'.png')
     attachment = './public/online-'+ imgIndex +'.png'
-    // attachment = new Discord.MessageAttachment('./public/online-'+ imgIndex +'.png')
     const embed = new Discord.MessageEmbed()
       .setColor('#40cbbe')
       .setDescription(description)
-    // if (attachment) {
-    //   embed.attachFiles(attachment)
-    //     .setThumbnail('attachment://online-'+ imgIndex +'.png')
-    // }
+    if (attachment) {
+      embed.attachFiles(attachment)
+        .setThumbnail('attachment://online-'+ imgIndex +'.png')
+    }
+    cleanFile('./public/online-'+ (imgIndex - 1) +'.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
     imgIndex++
-    const result = { embed }
-    if (attachment) result.files = [ attachment ]
-    return result
+    return embed
   }
 }
 
 let activeMessage
-const addStatusMessage = async (channel) => {
+const moveStatusMessage = async (channel) => {
   const embedData = await getStatusEmbed()
   const message = await channel.send('_Statut en temps réel_', embedData)
-  activeMessages.push(message.id)
+  activeMessage = message.id
 }
 
-const updateStatusMessages = async () => {
-  const toDelete = []
-  const embedMessage = await getStatusEmbed()
-  for (const messageId of activeMessages) {
-    try {
-      const message = await onlineChannel.messages.fetch(messageId)
-      message.suppressEmbeds()
-      message.edit('_Statut en temps réel_', embedMessage)
-    } catch (e) {
-      toDelete.push(messageId)
-    }
+const updateStatusMessage = async () => {
+  if (!activeMessage) return
+  const embedData = await getStatusEmbed()
+  try {
+    await onlineChannel.bulkDelete(10);
+    await onlineChannel.send('_Statut en temps réel_', embedData)
+  } catch (e) {
+    console.log(e)
+    activeMessage = false
   }
-  toDelete.forEach(v => {
-    const index = activeMessages.indexOf(v)
-    if (index > -1) {
-      activeMessages.splice(index, 1)
-    }
-  })
 }
 
 bot.prefix(prefix)
 bot
   .command('online')
   .description('Creates an online player display slot')
-  .action(message => {
+  .action(async message => {
     if (message.channel.id === onlineChannelId) {
-      addStatusMessage(message.channel)
+      await message.delete()
+      await moveStatusMessage(message.channel)
     }
   })
-bot.command('tmp').action(() => {
-  updateStatusMessages()
+bot.command('clean').action((message) => {
+  if (message.channel.id === onlineChannelId) {
+    message.channel.bulkDelete(100)
+  }
 })
 
 module.exports = async () => {
@@ -101,7 +107,7 @@ module.exports = async () => {
     onlineChannel = await client.channels.fetch(onlineChannelId)
 
     serverStatus.on('data', () => {
-      updateStatusMessages()
+      updateStatusMessage()
     })
   })
 
