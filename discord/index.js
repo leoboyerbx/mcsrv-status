@@ -1,5 +1,5 @@
 const ServerStatus = require('../minecraft/ServerStatus')
-const { token, prefix, onlineChannelId } = require('./config')
+const { token, prefix, onlineChannelId, webStatusUrl, webMapUrl } = require('./config')
 const Discord = require('discord.js')
 const bot = require('bot-commander')
 const mergeImg = require('merge-img')
@@ -9,7 +9,7 @@ const deleteFile = promisify(fs.unlink)
 const checkExists = promisify(fs.access)
 const client = new Discord.Client()
 require('discord-buttons')(client)
-const { MessageButton } = require('discord-buttons');
+const { MessageButton } = require('discord-buttons')
 
 const serverStatus = ServerStatus.getInstance()
 let onlineChannel
@@ -52,35 +52,44 @@ const getStatusEmbed = async () => {
       description += '\n\n_Aucun joueur connecté._'
     }
     const img = await mergeImg(images, { offset: 20 })
-    await writeImage(img, './public/online-'+ imgIndex +'.png')
-    attachment = './public/online-'+ imgIndex +'.png'
+    await writeImage(img, './public/online-' + imgIndex + '.png')
+    attachment = './public/online-' + imgIndex + '.png'
     const embed = new Discord.MessageEmbed()
       .setColor('#40cbbe')
       .setDescription(description)
     if (attachment) {
       embed.attachFiles(attachment)
-        .setThumbnail('attachment://online-'+ imgIndex +'.png')
+        .setThumbnail('attachment://online-' + imgIndex + '.png')
     }
-    cleanFile('./public/online-'+ (imgIndex - 1) +'.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
+    cleanFile('./public/online-' + (imgIndex - 1) + '.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
     imgIndex++
 
 
-    const statusButton = new MessageButton()
-      .setLabel("Voir le statut en ligne")
-      .setStyle('url')
-      .setURL('https://status.bruleurs.ml')
-    const mapButton = new MessageButton()
-      .setLabel("Ouvrir la Carte")
-      .setStyle('url')
-      .setURL('https://map.bruleurs.ml')
-    return { embed, buttons: [statusButton, mapButton] }
+    const buttons = []
+    if (webStatusUrl) {
+      buttons.push(
+        new MessageButton()
+        .setLabel('Voir le statut en ligne')
+        .setStyle('url')
+        .setURL(webStatusUrl)
+      )
+    }
+    if (webMapUrl) {
+      buttons.push(
+        new MessageButton()
+        .setLabel('Ouvrir la Carte')
+        .setStyle('url')
+        .setURL(webMapUrl)
+      )
+      return { embed, buttons }
+    }
   }
 }
 
 const updateStatusMessage = async () => {
   const embed = await getStatusEmbed()
   try {
-    await onlineChannel.bulkDelete(10);
+    await onlineChannel.bulkDelete(10)
     await onlineChannel.send('_Statut en temps réel_\n__', embed)
   } catch (e) {
     console.log(e)
