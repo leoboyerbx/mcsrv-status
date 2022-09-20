@@ -67,6 +67,7 @@ const getStatusEmbed = async () => {
 
     const buttons = []
     if (webStatusUrl) {
+      console.log("Web status url:", webStatusUrl)
       buttons.push(
         new MessageButton()
         .setLabel('Voir le statut en ligne')
