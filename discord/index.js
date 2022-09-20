@@ -67,24 +67,24 @@ const getStatusEmbed = async () => {
 
     const buttons = []
     if (webStatusUrl) {
-      console.log("Web status url:", webStatusUrl)
+      console.log('Web status url:', webStatusUrl)
       buttons.push(
         new MessageButton()
-        .setLabel('Voir le statut en ligne')
-        .setStyle('url')
-        .setURL(webStatusUrl)
+          .setLabel('Voir le statut en ligne')
+          .setStyle('url')
+          .setURL(webStatusUrl)
       )
     }
     if (webMapUrl) {
+      console.log('Web map url:', webMapUrl)
       buttons.push(
         new MessageButton()
-        .setLabel('Ouvrir la Carte')
-        .setStyle('url')
-        .setURL(webMapUrl)
+          .setLabel('Ouvrir la Carte')
+          .setStyle('url')
+          .setURL(webMapUrl)
       )
-      console.log(buttons)
-      return { embed, buttons }
     }
+    return { embed, buttons }
   }
 }
 
