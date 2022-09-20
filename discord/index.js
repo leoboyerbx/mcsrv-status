@@ -82,6 +82,7 @@ const getStatusEmbed = async () => {
         .setStyle('url')
         .setURL(webMapUrl)
       )
+      console.log(buttons)
       return { embed, buttons }
     }
   }
