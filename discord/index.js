@@ -1,5 +1,5 @@
 const ServerStatus = require('../minecraft/ServerStatus')
-const { token, prefix, onlineChannelId, webStatusUrl, webMapUrl } = require('./config')
+const { token, prefix, onlineChannelId, webStatusUrl, webMapUrl } = require('../config')
 const Discord = require('discord.js')
 const bot = require('bot-commander')
 const mergeImg = require('merge-img')

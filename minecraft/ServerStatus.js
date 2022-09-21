@@ -2,6 +2,7 @@ const Query = require("./lib/Query");
 const axios = require('axios')
 const EventEmitter = require('events')
 const sameArrayContent = require('./helpers/sameArrayContent')
+const { queryPort, queryHost } = require('../config')
 
 
 class ServerStatus extends EventEmitter {
@@ -10,7 +11,7 @@ class ServerStatus extends EventEmitter {
   constructor() {
     super();
 
-    this.q = new Query({host: 'localhost', port: 25565, timeout: 2000});
+    this.q = new Query({host: queryHost, port: queryPort, timeout: 2000});
     this.prevPlayers = []
     this.cachedPlayers = []
     this.serverOnline = false

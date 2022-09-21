@@ -1,5 +1,5 @@
 const ServerStatus = require('../minecraft/ServerStatus')
-const { token, prefix, onlineChannel } = require('./config')
+const { token, prefix, onlineChannel } = require('../config')
 const Discord = require('discord.js');
 const client = new Discord.Client();
 require('discord-buttons')(client)
