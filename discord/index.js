@@ -5,11 +5,12 @@ const bot = require('bot-commander')
 const mergeImg = require('merge-img')
 const { promisify } = require('util')
 const fs = require('fs')
+const { ButtonBuilder, EmbedBuilder } = require('discord.js')
 const deleteFile = promisify(fs.unlink)
 const checkExists = promisify(fs.access)
-const client = new Discord.Client()
-require('discord-buttons')(client)
-const { MessageButton } = require('discord-buttons')
+const client = new Discord.Client({intents: []})
+// require('discord-buttons')(client)
+// const { MessageButton } = require('discord-buttons')
 
 const serverStatus = ServerStatus.getInstance()
 let onlineChannel
@@ -35,9 +36,11 @@ const cleanFile = async filename => {
 
 const getStatusEmbed = async () => {
   if (!serverStatus.serverOnline) {
-    return new Discord.MessageEmbed()
+
+    const offlineEmbed = new EmbedBuilder()
       .setColor('#d53c3c')
       .setDescription('_Le serveur est hors-ligne_')
+    return { embeds: [offlineEmbed] }
   } else {
     const { players } = serverStatus
     let description = '**Joueurs actuellement connectés**:'
@@ -54,13 +57,10 @@ const getStatusEmbed = async () => {
     const img = await mergeImg(images, { offset: 20 })
     await writeImage(img, './public/online-' + imgIndex + '.png')
     attachment = './public/online-' + imgIndex + '.png'
-    const embed = new Discord.MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor('#40cbbe')
       .setDescription(description)
-    if (attachment) {
-      embed.attachFiles(attachment)
-        .setThumbnail('attachment://online-' + imgIndex + '.png')
-    }
+      .setThumbnail('attachment://online-' + imgIndex + '.png')
     cleanFile('./public/online-' + (imgIndex - 1) + '.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
     imgIndex++
 
@@ -69,7 +69,7 @@ const getStatusEmbed = async () => {
     if (webStatusUrl) {
       console.log('Web status url:', webStatusUrl)
       buttons.push(
-        new MessageButton()
+        new ButtonBuilder()
           .setLabel('Voir le statut en ligne')
           .setStyle('url')
           .setURL(webStatusUrl)
@@ -78,13 +78,13 @@ const getStatusEmbed = async () => {
     if (webMapUrl) {
       console.log('Web map url:', webMapUrl)
       buttons.push(
-        new MessageButton()
+        new ButtonBuilder()
           .setLabel('Ouvrir la Carte')
           .setStyle('url')
           .setURL(webMapUrl)
       )
     }
-    return { embed, buttons }
+    return { embeds: [embed], buttons, files: [attachment] }
   }
 }
 
@@ -92,7 +92,8 @@ const updateStatusMessage = async () => {
   const embed = await getStatusEmbed()
   try {
     await onlineChannel.bulkDelete(10)
-    await onlineChannel.send('_Statut en temps réel_\n__', embed)
+    console.log(embed)
+    await onlineChannel.send(embed)
   } catch (e) {
     console.log(e)
   }
