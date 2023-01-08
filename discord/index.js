@@ -43,7 +43,7 @@ const getStatusEmbed = async () => {
     return { embeds: [offlineEmbed] }
   } else {
     const { players } = serverStatus
-    let description = '**Joueurs actuellement connectés**:'
+    let description = `**${players?.length} joueurs actuellement connectés**:`
     let attachment
     const images = ['./public/blank.png']
     if (players?.length) {
@@ -60,7 +60,8 @@ const getStatusEmbed = async () => {
     const embed = new EmbedBuilder()
       .setColor('#40cbbe')
       .setDescription(description)
-      .setThumbnail('attachment://online-' + imgIndex + '.png')
+ //     .setThumbnail('attachment://online-' + imgIndex + '.png')
+	.setImage('attachment://online-' + imgIndex + '.png')
     cleanFile('./public/online-' + (imgIndex - 1) + '.png').then(rs => console.log(rs ? 'cleaned an old file' : 'no old file cleaned'))
     imgIndex++
 
@@ -92,7 +93,6 @@ const updateStatusMessage = async () => {
   const embed = await getStatusEmbed()
   try {
     await onlineChannel.bulkDelete(10)
-    console.log(embed)
     await onlineChannel.send(embed)
   } catch (e) {
     console.log(e)
