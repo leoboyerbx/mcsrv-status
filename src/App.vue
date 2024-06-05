@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container" v-if='serverData.players'>
     <div class="main-title">
-      <h1>Bruleurs</h1>
+      <h1>Ingenium status</h1>
       <p>{{ serverData.motd }}</p>
     </div>
     <div class="row">
