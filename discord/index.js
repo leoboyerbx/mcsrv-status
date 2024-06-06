@@ -72,7 +72,7 @@ const getStatusEmbed = async () => {
             buttons.push(
                 new ButtonBuilder()
                     .setLabel('Voir le statut en ligne')
-                    .setStyle('url')
+                    .setStyle('Link')
                     .setURL(webStatusUrl)
             )
         }
@@ -81,7 +81,7 @@ const getStatusEmbed = async () => {
             buttons.push(
                 new ButtonBuilder()
                     .setLabel('Ouvrir la Carte')
-                    .setStyle('url')
+                    .setStyle('Link')
                     .setURL(webMapUrl)
             )
         }
