@@ -16,7 +16,7 @@ app.use('/', express.static('dist'))
 
 const serverStatus = ServerStatus.getInstance()
 app.get('/query', (req, res) => {
-    res.send(serverStatus.serverData)
+    res.send(serverStatus.fullServerData)
 })
 
 app.listen(port, () => {
