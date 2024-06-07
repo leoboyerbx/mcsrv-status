@@ -48,7 +48,7 @@ const getStatusEmbed = async () => {
         const images = ['./public/blank.png']
         if (players?.length) {
             players.forEach(player => {
-                description += '\n - ' + player.name
+                description += '\n- ' + player.name
                 images.push('https://crafatar.com/renders/body/' + player.id + '?scale=2')
             })
         } else {
