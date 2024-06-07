@@ -3,6 +3,7 @@ const express = require('express')
 const ServerStatus = require('./minecraft/ServerStatus')
 const discord = require('./discord')
 const { existsSync } = require('fs')
+var cors = require('cors')
 const path = require('path')
 
 if (!existsSync(path.resolve(__dirname, 'dist'))) {
@@ -12,6 +13,7 @@ if (!existsSync(path.resolve(__dirname, 'dist'))) {
 const app = express()
 const port = 6754
 
+app.use(cors())
 app.use('/', express.static('dist'))
 
 const serverStatus = ServerStatus.getInstance()
